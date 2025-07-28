@@ -99,8 +99,8 @@ int GalCos_domain(int ipart)
       dist = distance(Particle[ipart].pos[0],Particle[ipart].pos[1],Particle[ipart].pos[2],
 		      Halos[i].pos[0],Halos[i].pos[1],Halos[i].pos[2]);
       
-	//dist = periodic_distance(Halos[i].pos,Particle[ipart].pos);
-	
+      //dist = periodic_distance(Halos[i].pos,Particle[ipart].pos);
+      
       dist = dist/Halos[i].Rvir;
       
       if(dist < mindist)

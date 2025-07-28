@@ -16,13 +16,21 @@ int GalCos_PartitionParticles(int istart, int iend)
   int Fileid, local_idx;
   char infile[100];
   int i;
+
+  if (task == 0) {
+    FILE *fp = fopen("posiciones.dat", "w");
+    if (fp == NULL) {
+      fprintf(stderr, "Error opening posiciones.dat for writing\n");
+      return -1;
+    }
+  }
   
   printf("\nPartitioning from %d to %d\n", istart, iend); fflush(stdout);
   
   // Precalculate global indices for each file
   for (Fileid=0; Fileid<NumFiles; Fileid++)
     {
-      
+      //printf("Processing file %d\n", Fileid); fflush(stdout);
       sprintf(infile, "%s.%d.hdf5", data_prefix, Fileid);
       
       hid_t file_id = H5Fopen(infile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -44,33 +52,32 @@ int GalCos_PartitionParticles(int istart, int iend)
       start_idx[Fileid] = offset;
       end_idx[Fileid] = offset + npart[1];
       offset = end_idx[Fileid];
-      
+      //printf("File %d: start_idx = %d, end_idx = %d\n", Fileid, start_idx[Fileid], end_idx[Fileid]);
+      fflush(stdout);
     }
   
   // Loop files and read particles
   local_idx = 0;
   for (Fileid=0; Fileid<NumFiles; Fileid++)
     {
-
       // If the file does not contain particles in the range [istart, iend), skip it
       if (end_idx[Fileid] <= istart || start_idx[Fileid] >= iend)
       continue; 
-	  
+
 	    sprintf(infile, "%s.%d.hdf5", data_prefix, Fileid);
 	    hid_t file_id = H5Fopen(infile, H5F_ACC_RDONLY, H5P_DEFAULT);
-	  
-	    if (file_id < 0)
-	      continue;
 	  
       hid_t group_id     = H5Gopen(file_id, "/PartType1", H5P_DEFAULT);
       hid_t dataset_id   = H5Dopen(group_id, "Coordinates", H5P_DEFAULT);
       hid_t filespace_id = H5Dget_space(dataset_id);
       hid_t memspace_id  = H5Screate_simple(2, (hsize_t[]){1, 3}, NULL);
-	  
+
+      printf("Reading particles from file %d in task %d\n", Fileid, task); fflush(stdout);
+      
 	    for(i = start_idx[Fileid]; i < end_idx[Fileid]; i++)
 	      {
-          if (i < start_idx[Fileid] || i >= end_idx[Fileid])
-            continue; // Skip particles not in this file
+          if (i < istart || i >= iend)
+            continue; 
 	      
 	      hsize_t offset_h[2] = {i - start_idx[Fileid], 0}; // Offset in the hyperslab, meaning the particle index in this file
 	      hsize_t count[2] = {1, 3};
@@ -79,12 +86,12 @@ int GalCos_PartitionParticles(int istart, int iend)
 	      float coord[3];
 	      herr_t status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, memspace_id, filespace_id, H5P_DEFAULT, coord);
 	      
-        //print the line of some particles and the file where it is
-        //if (i % 1000 == 0) {
-          //printf("Reading particle %d from file %d\n", i, Fileid);
-	  //}
-
 	      if (status >= 0) {
+          //imprimir en un archivo las posiciones para el task 0
+          if (task == 0) {
+            fprintf(fp, "%f %f %f\n", coord[0], coord[1], coord[2]);
+          }
+
             Particle[local_idx].pos[0] = coord[0];
             Particle[local_idx].pos[1] = coord[1];
             Particle[local_idx].pos[2] = coord[2];
@@ -95,12 +102,17 @@ int GalCos_PartitionParticles(int istart, int iend)
 	      }
 	      
 	    }//for i
-	  
+
+      fclose(fp); // Close the file after writing all positions
+
+      // Close HDF5 resources
 	  H5Sclose(memspace_id);
 	  H5Sclose(filespace_id);
 	  H5Dclose(dataset_id);
 	  H5Gclose(group_id);
 	  H5Fclose(file_id);
+
+
 	  
     }// for fileid
   

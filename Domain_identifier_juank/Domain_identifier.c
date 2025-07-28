@@ -93,8 +93,12 @@ int write_rescue(char *infile)
       aux.Rvir = Halos[i].Rvir;
       
       fwrite(&aux,sizeof(struct data),1,pf);
-      fwrite(&(Halos[i].Halo_particles[0]),sizeof(int),Halos[i].Nmembers,pf);
-      fwrite(&(Halos[i].Domain_particles[0]),sizeof(int),Halos[i].NDomain_particles,pf);
+
+      if(Halos[i].Nmembers > 0)
+	fwrite(&(Halos[i].Halo_particles[0]),sizeof(int),Halos[i].Nmembers,pf);
+
+      if(Halos[i].NDomain_particles > 0)
+	fwrite(&(Halos[i].Domain_particles[0]),sizeof(int),Halos[i].NDomain_particles,pf);
     }
   
   fclose(pf);
@@ -176,7 +180,7 @@ int main(int argc, char *argv[])
       printf(" Le toca %d particulas a cada nodo\n",Nparts_in_node); fflush(stdout);
       printf(" sobran %d particles\n",(UNCLUSTERED % Number_Processes)); fflush(stdout);
 
-      istart = Npart_clustered;
+      istart = Npart_clustered; // Start from the first unclustered particle
       for(i=0; i<Number_Processes; i++)
 	{
 	  //domain_info[i].istart = i*Nparts_in_node;
@@ -185,11 +189,11 @@ int main(int argc, char *argv[])
 	  domain_info[i].istart = istart;
 	  domain_info[i].iend   = istart + Nparts_in_node;
 	  domain_info[i].Nparts_per_node = domain_info[i].iend - domain_info[i].istart;
-	  istart = domain_info[i].iend;
+	  istart = domain_info[i].iend  ;
 	}
       
       i = Number_Processes-1;
-      domain_info[i].iend = UNCLUSTERED;
+      domain_info[i].iend = UNCLUSTERED+Npart_clustered; // Last process takes the remaining particles
       domain_info[i].Nparts_per_node = domain_info[i].iend - domain_info[i].istart;
       
       //i = 0;
@@ -222,7 +226,7 @@ int main(int argc, char *argv[])
   if(task == 0)	
     {
       printf(" %g Memory in particles = %g %d\n", sizeof(struct part)/(1024*1024.0),
-	     UNCLUSTERED*sizeof(struct part)/(1024*1024.0), Npart_Total); fflush(stdout);
+	     UNCLUSTERED*sizeof(struct part)/(1024*1024.0), Npart_unclustered); fflush(stdout);
       
       printf(" %g Memory in halos = %g\n", sizeof(struct halo)/(1024*1024.0),
 	     NGROUPS*sizeof(struct halo)/(1024*1024.0)); fflush(stdout);
@@ -240,8 +244,9 @@ int main(int argc, char *argv[])
   ////Esto lo podemos borrar???
     if (Particle != NULL)
     free(Particle);
-  
+    
   if (domain_info[task].Nparts_per_node > 0) {
+    
     Particle = (struct part *) malloc((size_t) domain_info[task].Nparts_per_node * sizeof(struct part));
     if (Particle == NULL) {
       printf("No memory available to load particles\n");
@@ -270,12 +275,6 @@ int main(int argc, char *argv[])
   //// Reading particle positions
   GalCos_PartitionParticles(domain_info[task].istart, domain_info[task].iend);
   
-  // ///////////////////////////
-  printf("Hasta aqui todo bien\n");
-  //MPI_Finalize();
-  //exit(0);
-  // ///////////////////////////
-  
   MPI_Barrier(MPI_COMM_WORLD);
   
   /////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +289,7 @@ int main(int argc, char *argv[])
 	printf(" (%d) *Computed domains for %d at %f min\n",task,counter,
 	       (tiempoc()-Tini)/60.0); fflush(stdout);
       
-      if(Particle[i].Cluster_ID == EMPTY_FLAG)
+      //if(Particle[i].Cluster_ID == EMPTY_FLAG)
 	GalCos_domain(i);
       
       counter++;
@@ -298,6 +297,12 @@ int main(int argc, char *argv[])
   
   MPI_Barrier(MPI_COMM_WORLD);
   
+  // ///////////////////////////
+  //printf("Hasta aqui todo bien\n");
+  //MPI_Finalize();
+  //exit(0);
+  // ///////////////////////////
+
   /////////////////////////////////////////////////////////////////////////////////
   /*      Sending Particle information from the other machines to the 0 task     */
   /////////////////////////////////////////////////////////////////////////////////
@@ -436,23 +441,41 @@ int main(int argc, char *argv[])
     }
   
   MPI_Barrier(MPI_COMM_WORLD);
-  
+
   if(task == 0) 
     {
+      //aqui falla
       
-      for(i=0; i<NCLUSTERS; i++)
+      /*
+	for(i=0; i<NCLUSTERS; i++)
 	{
-	  Halos[i].Halo_particles = (int *) malloc((size_t) Halos[i].Nmembers*sizeof(int));
-	  
-	  for(j=0; j<Halos[i].Nmembers; j++)
-	    Halos[i].Halo_particles[j] = auxHalos[i].Halo_particles[j];
+	Halos[i].Halo_particles = (int *) malloc((size_t) Halos[i].Nmembers*sizeof(int));
+	// Halos[i].Nmembers no está definido
+	for(j=0; j<Halos[i].Nmembers; j++)
+	Halos[i].Halo_particles[j] = auxHalos[i].Halo_particles[j];
 	}
-
+      */
+      
+      // ///////////////////////////
+      printf("Hasta aqui todo bien\n");
+      //MPI_Finalize();
+      //exit(0);
+      // ///////////////////////////
       printf("Writing info files\n");
       write_rescue(infile);
       
       printf("all is done!\n");
       fflush(stdout);
+
+
+      pf = fopen("Halo_Catalog.dat", "w");
+      for(j=0; j<NCLUSTERS; j++)
+	{
+	  fprintf(pf,"%16.8lf %16.8lf %16.8lf %16.8lf %16.8lf %16.8lf %12d\n", Halos[j].pos[0], Halos[j].pos[1], Halos[j].pos[2],
+		  Halos[j].Mvir, Halos[j].Rvir, Halos[j].NDomain_particles*PARTMASS, Halos[j].NDomain_particles);
+	}
+      fclose(pf);
+      
     }
   
   free(Particle);

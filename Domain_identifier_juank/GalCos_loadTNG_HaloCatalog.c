@@ -4,7 +4,7 @@
 int Galcos_loadTNG_HaloCatalog(void)
 {  
   
-  int Halo_counter, Nmembers1, fileid, NGROUPS_THISFILE, i;
+  int Halo_counter, Nmembers, fileid, NGROUPS_THISFILE, i;
   char cat_file[1000];
   hid_t file_id, group_id, dataset_id, dataspace_id, header_group, attr_id;
   herr_t status;
@@ -50,7 +50,11 @@ int Galcos_loadTNG_HaloCatalog(void)
 	  
           H5Aclose(attr_id);
           H5Gclose(header_group);
-	  
+	  if (NGROUPS_THISFILE <= 0) {
+            printf("No groups found in %s\n", cat_file);
+            H5Fclose(file_id);
+            continue;
+          }
           printf("Number of groups in this file: %d\n", NGROUPS_THISFILE); fflush(stdout);
 
           group_members = (int *) malloc(NGROUPS_THISFILE * sizeof(int));
@@ -58,9 +62,9 @@ int Galcos_loadTNG_HaloCatalog(void)
           group_pos = malloc(NGROUPS_THISFILE * sizeof(*group_pos));
           group_radius = (float *) malloc(NGROUPS_THISFILE * sizeof(float));
           group_mass_top_hat = (float *) malloc(NGROUPS_THISFILE * sizeof(float));
-
 	  
-          /////////////////////////////////////////////////////////////////////////////////////                                                                            
+	  
+          /////////////////////////////////////////////////////////////////////////////////////
 	  
           group_id = H5Gopen(file_id, "Group", H5P_DEFAULT);
           if(group_id < 0) {
@@ -69,9 +73,10 @@ int Galcos_loadTNG_HaloCatalog(void)
             exit(0);
           }
 	  
-          //Open the GroupLen dataset to get the number of members in each group                                                                                           
+          //Open the GroupLen dataset to get the number of members in each group
           dataset_id = H5Dopen(group_id, "GroupLen", H5P_DEFAULT);
           if(dataset_id < 0) {
+            
             printf("Cannot open GroupLen in %s\n", cat_file);
             MPI_Finalize();
             exit(0);
@@ -183,8 +188,8 @@ int Galcos_loadTNG_HaloCatalog(void)
             {
               
 
-
-              Halos[Halo_counter].Nmembers = group_members[i];
+	      
+              Halos[Halo_counter].Nmembers = 0; //group_members[i];
               Halos[Halo_counter].mass     = group_mass[i];
               Halos[Halo_counter].NDomain_particles   = 0;
               Halos[Halo_counter].pos[0]   = group_pos[i][0];
