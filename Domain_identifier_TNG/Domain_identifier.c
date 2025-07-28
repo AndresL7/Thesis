@@ -457,7 +457,6 @@ int main(int argc, char *argv[])
       */
       
       // ///////////////////////////
-      printf("Hasta aqui todo bien\n");
       //MPI_Finalize();
       //exit(0);
       // ///////////////////////////
