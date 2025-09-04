@@ -1,0 +1,125 @@
+../../data/snap_099.0.hdf5../../data/snap_099.0.hdf5../../data/snap_099.0.hdf5 * Running on 4 processors
+
+====================================================
+ >> UNITS AND PARAMETERS
+MINIMUM_MEMBERS 30
+MINIMUM_NSUBSTRUCT 32
+LINKING_LENGHT 0.2
+MINIMUM_NGB 32
+GRAV_SOFT 0.01
+
+FLAG_SUBFIND 0
+
+OMEGABARYON 0.043
+OMEGA_MATTER 0.258
+
+G_INTERNAL_UNITS 43.0071
+LENGHT_INTERNAL_UNITS 3.08568e+24
+VELOCITY_INTERNAL_UNITS 100000
+MASS_INTERNAL_UNITS 1.989e+43
+TIME_INTERNAL_UNITS 3.08568e+19
+ENERGY_INTERNAL_UNITS 1.989e+53
+DENSITY_INTERNAL_UNITS 6.76991e-31
+HUBBLE_INTERNAL_UNITS 100
+
+
+====================================================
+../../data/snap_099.0.hdf5Total number of particles: 19683000
+* Frame's Time... 1
+* Redshift... 2.22045e-16
+* FlagSfr... 0
+* FlagFeedback... 0
+* FlagCooling... 0
+* NumFiles... 4
+* BoxSize... 35000
+* Omega0... 0.3089
+* OmegaLambda... 0.6911
+* HubbleParam... 0.6774
+* Particle mass... 0.0186755
+====================================================
+Number of TOTAL unclustered particles: 9587888
+====================================================
+ Le toca 2396972 particulas a cada nodo
+ sobran 0 particles
+task 0 start at 10095112 and ends at 12492084, nparts=2396972
+task 1 start at 12492084 and ends at 14889056, nparts=2396972
+task 2 start at 14889056 and ends at 17286028, nparts=2396972
+task 3 start at 17286028 and ends at 19683000, nparts=2396972
+ >> LOADING PARTICLE DATA FROM GADGET FILE...
+ 4.19617e-05 Memory in particles = 402.324 19683000
+ 7.62939e-05 Memory in halos = 1.43616
+ THERE ARE 9587888 UNCLUSTERED PARTICLES (48.711518 percent)
+Ngroups = 18824
+
+Reading catalog 0.....
+Ngroups = 18824
+Ngroups = 18824
+Ngroups = 18824
+Number of groups in this file: 9
+Group 0 has 863872 members
+Group 0 has mass 16133.2
+Group 0 position: (7306.57, 24566.2, 21315.8)
+Group 0 radius (TopHat200): 1081.12 kpc
+Group 0 mass (TopHat200): 15032e10 Msun
+
+Reading catalog 1.....
+Number of groups in this file: 2711
+Group 9 has 138808 members
+Group 9 has mass 2592.31
+Group 9 position: (3626.15, 18742.8, 13210.4)
+Group 9 radius (TopHat200): 586.562 kpc
+Group 9 mass (TopHat200): 2400.83e10 Msun
+
+Reading catalog 2.....
+Number of groups in this file: 8052
+Group 2720 has 271 members
+Group 2720 has mass 5.06106
+Group 2720 position: (15998.4, 29837.1, 25385.3)
+Group 2720 radius (TopHat200): 72.721 kpc
+Group 2720 mass (TopHat200): 4.57549e10 Msun
+
+Reading catalog 3.....
+Number of groups in this file: 8052
+Group 10772 has 57 members
+Group 10772 has mass 1.0645
+Group 10772 position: (16846, 16714.8, 3266.18)
+Group 10772 radius (TopHat200): 30.4577 kpc
+Group 10772 mass (TopHat200): 0.336159e10 Msun
+
+Partitioning from 14889056 to 17286028
+
+Partitioning from 17286028 to 19683000
+
+Partitioning from 12492084 to 14889056
+Reading particles from file 3 in task 2
+Reading particles from file 3 in task 3
+Reading particles from file 2 in task 1
+
+Partitioning from 10095112 to 12492084
+Reading particles from file 2 in task 0
+Reading particles from file 3 in task 1
+Partition from 12492084 to 14889056 completed. 
+Partition from 14889056 to 17286028 completed. 
+Partition from 17286028 to 19683000 completed. 
+Partition from 10095112 to 12492084 completed. 
+ (0) *Computed domains for 0 at 0.116667 min
+ (1) *Computed domains for 0 at 0.116667 min
+ (2) *Computed domains for 0 at 0.116667 min
+ (3) *Computed domains for 0 at 0.116667 min
+ (1) *Computed domains for 1000000 at 5.650000 min
+ (2) *Computed domains for 1000000 at 5.650000 min
+ (0) *Computed domains for 1000000 at 5.650000 min
+ (3) *Computed domains for 1000000 at 5.666667 min
+ (1) *Computed domains for 2000000 at 11.183333 min
+ (2) *Computed domains for 2000000 at 11.200000 min
+ (0) *Computed domains for 2000000 at 11.200000 min
+ (3) *Computed domains for 2000000 at 11.216667 min
+Receiving info of halos from 1 2434620
+recibidos
+Receiving info of halos from 2 2434620
+recibidos
+Receiving info of halos from 3 2434620
+recibidos
+Hasta aqui todo bien
+Writing info files
+all is done!
